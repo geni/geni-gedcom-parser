@@ -1,8 +1,8 @@
 {
-  "name": "package-name",
+  "name": "geni-gedcom-parser",
   "version": "0.0.1",
-  "description": "",
-  "main": "package-name.js",
+  "description": "Geni's GEDCOM parser implementation.",
+  "main": "geni-gedcom-parser.js",
   "scripts": {
     "build": "mkdir -p lib ; babel ./src -d ./lib",
     "coverage": "jest --coverage",
@@ -18,7 +18,7 @@
   "jest": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ss/package-name.git"
+    "url": "git+https://github.com/geni/geni-gedcom-parser.git"
   },
   "keywords": [
     "npm",
@@ -27,7 +27,15 @@
   "author": "Scott Steadman",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ss/package-name/issues"
+    "url": "https://github.com/geni/geni-gedcom-parser/issues"
   },
-  "homepage": "https://github.com/ss/package-name#readme"
+  "homepage": "https://github.com/geni/geni-gedcom-parser#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "eslint": "^5.12.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "jest": "^23.6.0"
+  }
 }

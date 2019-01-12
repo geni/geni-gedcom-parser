@@ -1,32 +1,10 @@
 
-# NPM Package Starting Point.
+# Geni implementation of a GEDCOM parser
 
 ## Why?
-My goal with this repository is to have a starting point
-for developing NPM packages.
 
-I envison forking this repo into a new repo for the
-NPM package I want to create.
+I looked around at other GEDCOM parser implementations,
+but they didn't do what I wanted.  So I'm creating
+yet another implementation.
 
-## Example Usage:
-On GitHub: fork npm-package-start-point repo into booyah.js repo
-
-On Development Machine:
-```
-  git clone https://github.com/ss/booyah.js
-
-  cd booyah.js
-
-  # modify commit template if desired
-  # modify README.md
-
-  npm run setup
-  # Configure ESLint to use Airbnb coding standards
-
-  git add .eslintrc.json
-  git commit
-  git push
-```
-
-We're ready to start development...
-
+I'm using this in my Geni serverless research.
