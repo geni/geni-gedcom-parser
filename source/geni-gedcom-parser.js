@@ -12,6 +12,18 @@ class GedcomParser {
     Object.assign(this, opts);
   }
 
+  /**
+   * Write logging information.
+   *
+   * It is intended that this method be overwritten to get
+   * it to call another logging service (eg. log4js).
+   *
+   * @since 1.0
+   */
+  log(...args) { // eslint-disable-line class-methods-use-this
+    console.log(...args); // eslint-disable-line no-console
+  }
+
 }
 
 module.exports = {

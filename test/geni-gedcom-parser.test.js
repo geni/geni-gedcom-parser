@@ -12,3 +12,14 @@ describe('constructor()', () => {
 
 }); // describe constructor()
 
+describe('log()', () => {
+
+  it('takes an arbitray number of arguments', () => {
+    const parser     = new Gedcom.Parser();
+    global.console = { log: jest.fn() };
+    parser.log('one', 'two', 'tre');
+    expect(global.console.log).toHaveBeenCalledTimes(1);
+    expect(global.console.log).toHaveBeenCalledWith('one', 'two', 'tre');
+  });
+
+}); // describe log()
