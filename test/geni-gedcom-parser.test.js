@@ -94,3 +94,109 @@ describe('readLine()', () => {
   });
 
 }); // describe readLine()
+
+describe('parseLine()', () => {
+
+  it('handles LEVEL TAG', () => {
+    const parser = new Gedcom.Parser('0 TAG');
+    expect(parser.parseLine()).toEqual({level: 0, tag: 'TAG'});
+  });
+
+  it('handles LEVEL TAG DATA', () => {
+    const parser = new Gedcom.Parser('0 TAG DATA');
+    expect(parser.parseLine()).toEqual({level: 0, tag: 'TAG', data: 'DATA'});
+  });
+
+  it('handles LEVEL TAG DATA DATA', () => {
+    const parser = new Gedcom.Parser('0 TAG DATA DATA');
+    expect(parser.parseLine()).toEqual({level: 0, tag: 'TAG', data: 'DATA DATA'});
+  });
+
+  it('handles LEVEL LABEL TAG', () => {
+    const parser = new Gedcom.Parser('0 @LABEL@ TAG');
+    expect(parser.parseLine()).toEqual({level: 0, label: '@LABEL@', tag: 'TAG'});
+  });
+
+  it('handles LEVEL LABEL TAG DATA', () => {
+    const parser = new Gedcom.Parser('0 @LABEL@ TAG DATA');
+    expect(parser.parseLine()).toEqual({level: 0, label: '@LABEL@', tag: 'TAG', data: 'DATA'});
+  });
+
+  it('handles LEVEL LABEL TAG DATA DATA', () => {
+    const parser = new Gedcom.Parser('0 @LABEL@ TAG DATA DATA');
+    expect(parser.parseLine()).toEqual({level: 0, label: '@LABEL@', tag: 'TAG', data: 'DATA DATA'});
+  });
+
+  it('invokes the ParseLine callbacks', () => {
+    const parser = new Gedcom.Parser('0 ZERO');
+    parser.onParseZEROLine = jest.fn();
+    parser.onParseLine = jest.fn();
+
+    parser.parseLine();
+
+    const expected = {level: 0, tag: 'ZERO'};
+    expect(parser.onParseZEROLine).toHaveBeenCalledTimes(1);
+    expect(parser.onParseZEROLine).toHaveBeenCalledWith(expected);
+    expect(parser.onParseLine).toHaveBeenCalledTimes(1);
+    expect(parser.onParseLine).toHaveBeenCalledWith(expected);
+  });
+
+  describe('when autoContinueInvalidLines is false', () => {
+    let parser;
+
+    function createParser(input) {
+      return new Gedcom.Parser(input, {autoContinueInvalidLines: false});
+    }
+
+    afterEach( () => {
+      expect(parser.autoContinueInvalidLines).toBe(false);
+    });
+
+    it('skips blank lines', () => {
+      parser = createParser('\r\n \r\n0 TAG');
+      expect(parser.parseLine()).toEqual({level: 0, tag: 'TAG'});
+    });
+
+    test.each([
+      ['A', 'Invalid line: "A"'],
+      ['1492Columbus', 'Invalid line: "1492Columbus"'],
+    ])('invokes onParseLineError for invalid line "%s"', (invalidLine, expectedMessage) => {
+      parser = createParser(invalidLine);
+      parser.onParseLineError = jest.fn();
+      expect(parser.parseLine()).toBeUndefined();
+      expect(parser.onParseLineError).toHaveBeenCalledTimes(1);
+      expect(parser.onParseLineError).toHaveBeenCalledWith(expectedMessage);
+    });
+
+  }); // describe when autoContinueInvalidLines is false
+
+  describe('when autoContinueInvalidLines is true', () => {
+    let parser;
+
+    function createParser(input) {
+      return new Gedcom.Parser(input, {autoContinueInvalidLines: true});
+    }
+
+    afterEach( () => {
+      expect(parser.autoContinueInvalidLines).toBe(true);
+    });
+
+    it('turns blank lines into CONT', () => {
+      parser = createParser('\r\n \r\n0 TAG');
+      expect(parser.parseLine()).toEqual({tag: 'CONT', data: ''});
+      expect(parser.parseLine()).toEqual({tag: 'CONT', data: ' '});
+      expect(parser.parseLine()).toEqual({level: 0, tag: 'TAG'});
+    });
+
+    it('autocontinues invalid lines', () => {
+      parser = createParser("0 TAG\r\ncontinued\r\n1 TAG\r\n\r\n1492Columbus\r\n");
+      parser.onParseLineError = jest.fn();
+      expect(parser.parseLine()).toEqual({level: 0, tag: 'TAG'});
+      expect(parser.parseLine()).toEqual({tag: 'CONT', data: 'continued'});
+      expect(parser.parseLine()).toEqual({level: 1, tag: 'TAG'});
+      expect(parser.parseLine()).toEqual({tag: 'CONT', data: '1492Columbus'});
+    });
+
+  }); // describe when autoContinueInvalidLines is false
+
+}); // describe parseLine()
