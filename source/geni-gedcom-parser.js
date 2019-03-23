@@ -8,8 +8,52 @@ class GedcomParser {
    * @param {type} opts   Configuration overrides
    */
   constructor(input, opts = {}) {
+
+    /**
+     * End of line defined by combination of \n or \r
+     */
+    this.lineSeparator = /[\r\n]+/;
+
     this.input = input;
     Object.assign(this, opts);
+  }
+
+  /**
+   * Read an input text line.
+   *
+   * This method will invoke callbacks for every line read:
+   *
+   * If this.onReadLine is defined, it will be called whenever a line is read.
+   * The line will be parsed as a parameter to the callback.
+   *
+   * @returns the next line of text from the input
+   *
+   * @since 1.0
+   * @see invokeCallback method
+   */
+  readLine() {
+    this.lastLine = this.remainingLines(this.lineSeparator).shift();
+
+    if (this.lastLine) {
+      this.lineNumber += 1;
+    }
+
+    this.invokeCallback('ReadLine', this.lastLine);
+    return this.lastLine;
+  }
+
+  /**
+   * Return the remaining input lines.
+   *
+   * @since 1.0
+   */
+  remainingLines() {
+    if (!this.lines) {
+      this.lines      = this.input.split(this.lineSeparator);
+      this.lineNumber = 0;
+    }
+
+    return this.lines;
   }
 
   /**

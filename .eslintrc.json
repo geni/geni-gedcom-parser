@@ -1,6 +1,7 @@
 {
     "extends": "airbnb-base",
     "rules": {
+      "no-multi-spaces": "off",
       "padded-blocks": "off"
     }
 }
