@@ -23,3 +23,29 @@ describe('log()', () => {
   });
 
 }); // describe log()
+
+describe('invokeCallback()', () => {
+
+  it('does nothing if the callback is undefined', () => {
+    const parser = new Gedcom.Parser();
+    parser.invokeCallback('Foo', 'arg1', 'arg2');
+  });
+
+  it('invokes a named callback with arbitrary parameters', () => {
+    const parser = new Gedcom.Parser();
+    parser.onFoo = function(arg1, arg2) {
+      expect(arg1).toEqual('arg1');
+      expect(arg2).toEqual('arg2');
+    }
+    parser.invokeCallback('Foo', 'arg1', 'arg2');
+  });
+
+  it('value of "this" is the parser', () => {
+    const parser = new Gedcom.Parser();
+    parser.onFoo = function() {
+      expect(this).toEqual(parser);
+    }
+    parser.invokeCallback('Foo');
+  });
+
+}); // describe invokeCallback()

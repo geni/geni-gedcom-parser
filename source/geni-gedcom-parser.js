@@ -24,6 +24,22 @@ class GedcomParser {
     console.log(...args); // eslint-disable-line no-console
   }
 
+  /**
+   * Invoke a callback if it's defined.
+   *
+   * @param event - the event causing the callback.
+   *
+   * The actual name of the callback is on<event>.
+   *
+   * @example this.invokeCallback('Foo', 'bar', 'baz', 'bunch') will call
+   * this.onFoo('bar', 'baz', 'bunch')
+   *
+   * @since 1.0
+   */
+  invokeCallback(event, ...args) {
+    const callback = `on${event}`;
+    if (this[callback]) this[callback](...args);
+  }
 }
 
 module.exports = {
