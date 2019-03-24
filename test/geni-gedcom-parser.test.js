@@ -190,7 +190,6 @@ describe('parseLine()', () => {
 
     it('autocontinues invalid lines', () => {
       parser = createParser("0 TAG\r\ncontinued\r\n1 TAG\r\n\r\n1492Columbus\r\n");
-      parser.onParseLineError = jest.fn();
       expect(parser.parseLine()).toEqual({level: 0, tag: 'TAG'});
       expect(parser.parseLine()).toEqual({tag: 'CONT', data: 'continued'});
       expect(parser.parseLine()).toEqual({level: 1, tag: 'TAG'});
@@ -200,3 +199,65 @@ describe('parseLine()', () => {
   }); // describe when autoContinueInvalidLines is false
 
 }); // describe parseLine()
+
+describe('parseStructure()', () => {
+
+  it('handles CONT', () => {
+    const parser = new Gedcom.Parser('0 TAG line 1\r\n1 CONT line 2');
+    expect(parser.parseStructure()).toEqual({level: 0, tag: 'TAG', data: 'line 1\nline 2'});
+  });
+
+  it('handles CONC', () => {
+    const parser = new Gedcom.Parser('0 TAG line 1\r\n1 CONC  line 2');
+    expect(parser.parseStructure()).toEqual({level: 0, tag: 'TAG', data: 'line 1 line 2'});
+  });
+
+  it('handles CONC and CONT', () => {
+    const parser = new Gedcom.Parser('0 TAG line 1\r\n1 CONC  part 2\r\n1 CONT line 2');
+    expect(parser.parseStructure()).toEqual({level: 0, tag: 'TAG', data: 'line 1 part 2\nline 2'});
+  });
+
+  it('handles nested structures', () => {
+    const parser   = new Gedcom.Parser('0 INDI\n1 NAME First /Last/\n1 BIRT\n2 DATE 21 MAY 1968\n2 PLAC Florida, US\n1 BAPT\n2 DATE 22 MAY 1968\n2 PLAC Florida, US');
+    const expected = { level: 0, tag: 'INDI',
+      structures: [
+        {level: 1, tag: 'NAME', data: 'First /Last/'},
+        {level: 1, tag: 'BIRT',
+          structures: [
+            {level: 2, tag: 'DATE', data: '21 MAY 1968'},
+            {level: 2, tag: 'PLAC', data: 'Florida, US'},
+          ]
+        },
+        {level: 1, tag: 'BAPT',
+          structures: [
+            {level: 2, tag: 'DATE', data: '22 MAY 1968'},
+            {level: 2, tag: 'PLAC', data: 'Florida, US'},
+          ]
+        },
+      ]
+    };
+    expect(parser.parseStructure()).toEqual(expected);
+  });
+
+  it('invokes callbacks', () => {
+    const parser = new Gedcom.Parser('0 INDI\n1 NAME First /Last/\n');
+    parser.onParseStructure = jest.fn();
+    parser.onParseINDIStructure = jest.fn();
+    parser.onParseNAMEStructure = jest.fn();
+
+    parser.parseStructure();
+
+    expect(parser.onParseStructure).toHaveBeenCalledTimes(2);
+
+    expect(parser.onParseINDIStructure).toHaveBeenCalledTimes(1);
+    const expectedINDIRecord = {level:0, tag:'INDI', structures:[{level:1, tag:'NAME', data:'First /Last/'}]};
+    expect(parser.onParseINDIStructure).toHaveBeenCalledWith(expectedINDIRecord);
+
+    expect(parser.onParseNAMEStructure).toHaveBeenCalledTimes(1);
+    const expectedNAMERecord = {level:1, tag:'NAME', data:'First /Last/'};
+    expect(parser.onParseNAMEStructure).toHaveBeenCalledWith(expectedNAMERecord);
+  });
+
+
+}); // describe parseStructure()
+

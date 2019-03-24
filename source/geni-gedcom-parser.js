@@ -35,6 +35,79 @@ class GedcomParser {
   }
 
   /**
+   * Parse a GEDCOM structure from the input.
+   *
+   * A GEDCOM structure consists of one or more lines of text.
+   *
+   * This method will call invokeParseStructureCallbacks for every structure parsed.
+   *
+   * @returns the next GEDCOM structure
+   *
+   * @since 1.0
+   * @see invokeParseStructureCallbacks method
+   */
+  parseStructure() {
+
+    if (!this.isMoreInput()) {
+      /* istanbul ignore next - jest incorrectly reports next line uncovered */
+      if (this.nextStructure) {
+        this.invokeParseStructureCallbacks(this.nextStructure);
+      }
+
+      const shortCircuitReturnValue = this.nextStructure;
+      this.nextStructure = null;
+      return shortCircuitReturnValue;
+    }
+
+    const currentStructure = this.nextStructure || this.parseLine();
+    this.nextStructure     = this.parseLine();
+
+    while (this.nextStructure.level > currentStructure.level) {
+
+      if (this.nextStructure.tag.toUpperCase() === 'CONC') {
+        currentStructure.data += this.nextStructure.data;
+
+      } else if (this.nextStructure.tag.toUpperCase() === 'CONT') {
+        currentStructure.data += `\n${this.nextStructure.data}`;
+
+      } else {
+        currentStructure.structures = currentStructure.structures || [];
+        currentStructure.structures.push(this.parseStructure());
+        if (this.nextStructure) continue; // eslint-disable-line no-continue
+      }
+
+      if (this.isMoreInput()) {
+        this.nextStructure = this.parseLine();
+      } else {
+        break;
+      }
+
+    } // while
+
+    this.invokeParseStructureCallbacks(currentStructure);
+    return currentStructure;
+  }
+
+  /**
+   * Invoke all callbacks resulting from a parseStructure call.
+   *
+   * If this.onParse<TAG>Structure is defined, it will be called whenever a structure with a
+   * matching tag is parsed. The parsed structure is the only argument passed to the callback.
+   *
+   * If this.onParseStructure is defined, it will be called whenever a structure is parsed.
+   * The parsed structure is the only argument passed to the callback.
+   *
+   * @since 1.0
+   * @see invokeCallback method
+   */
+  invokeParseStructureCallbacks(structure) {
+    this.invokeCallback(`Parse${structure.tag}Structure`, structure);
+    this.invokeCallback('ParseStructure', structure);
+
+    return structure;
+  }
+
+  /**
    * Parse a line of input and return it as an Object.
    *
    * This method will call invokeParseLineCallbacks for every line parsed.
