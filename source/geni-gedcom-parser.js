@@ -35,6 +35,41 @@ class GedcomParser {
   }
 
   /**
+   * Parse a GEDCOM record from the input.
+   *
+   * This method will call invokeParseRecordCallbacks for the record then return the record to the
+   * caller.  It will also invoke the onParseRecordError callback if an invalid record is parsed.
+   *
+   * @returns the next GEDCOM record
+   *
+   * @since 1.0
+   */
+  parseRecord() {
+    if (!this.isMoreInput()) return null;
+
+    const record = this.parseStructure();
+
+    if (record.level !== 0) {
+      this.invokeCallback('ParseRecordError', 'Invalid record', record);
+      return null;
+    }
+
+    this.invokeParseRecordCallbacks(record);
+
+    return record;
+  }
+
+  /**
+   * Invoke all callbacks resulting from a parseRecord call
+   *
+   * @since 1.0
+   */
+  invokeParseRecordCallbacks(record) {
+    this.invokeCallback(`Parse${record.tag}Record`, record);
+    this.invokeCallback('ParseRecord', record);
+  }
+
+  /**
    * Parse a GEDCOM structure from the input.
    *
    * A GEDCOM structure consists of one or more lines of text.

@@ -261,3 +261,45 @@ describe('parseStructure()', () => {
 
 }); // describe parseStructure()
 
+describe('parseRecord()', () => {
+
+  it('returns null when there is no input', () => {
+    const parser = new Gedcom.Parser('');
+    parser.readLine();
+    expect(parser.parseRecord()).toBe(null);
+  });
+
+  it('returns a record', () => {
+    const parser   = new Gedcom.Parser('0 INDI\n1 NAME First /Last/');
+    const expected = { level: 0, tag: 'INDI',
+      structures: [
+        {level: 1, tag: 'NAME', data: 'First /Last/'},
+      ]
+    };
+    expect(parser.parseRecord()).toEqual(expected);
+  });
+
+  it('invokes ParseRecordError callback on error', () => {
+    const parser = new Gedcom.Parser('1 NAME First /Last/');
+    parser.onParseRecordError = jest.fn();
+    expect(parser.parseRecord()).toBe(null);
+    expect(parser.onParseRecordError).toHaveBeenCalledTimes(1);
+    expect(parser.onParseRecordError).toHaveBeenCalledWith('Invalid record', {level:1, tag:'NAME', data:'First /Last/'});
+  });
+
+  it('invokes callbacks', () => {
+    const parser = new Gedcom.Parser('0 INDI\n1 NAME First /Last/\n');
+    parser.onParseRecord = jest.fn();
+    parser.onParseINDIRecord = jest.fn();
+
+    parser.parseRecord();
+
+    expect(parser.onParseRecord).toHaveBeenCalledTimes(1);
+
+    expect(parser.onParseINDIRecord).toHaveBeenCalledTimes(1);
+    const expectedINDIRecord = {level:0, tag:'INDI', structures:[{level:1, tag:'NAME', data:'First /Last/'}]};
+    expect(parser.onParseINDIRecord).toHaveBeenCalledWith(expectedINDIRecord);
+  });
+
+}); // describe parseRecord()
+
