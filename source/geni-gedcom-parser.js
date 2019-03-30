@@ -103,8 +103,6 @@ class GedcomParser {
   invokeParseStructureCallbacks(structure) {
     this.invokeCallback(`Parse${structure.tag}Structure`, structure);
     this.invokeCallback('ParseStructure', structure);
-
-    return structure;
   }
 
   /**
