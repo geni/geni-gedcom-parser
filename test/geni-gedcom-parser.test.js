@@ -158,14 +158,14 @@ describe('parseLine()', () => {
     });
 
     test.each([
-      ['A', 'Invalid line: "A"'],
-      ['1492Columbus', 'Invalid line: "1492Columbus"'],
-    ])('invokes onParseLineError for invalid line "%s"', (invalidLine, expectedMessage) => {
+      ['A', 'Invalid line', 'A'],
+      ['1492Columbus', 'Invalid line', '1492Columbus'],
+    ])('invokes onParseLineError for invalid line "%s"', (invalidLine, ...expectedArguments) => {
       parser = createParser(invalidLine);
       parser.onParseLineError = jest.fn();
       expect(parser.parseLine()).toBeUndefined();
       expect(parser.onParseLineError).toHaveBeenCalledTimes(1);
-      expect(parser.onParseLineError).toHaveBeenCalledWith(expectedMessage);
+      expect(parser.onParseLineError).toHaveBeenCalledWith(...expectedArguments);
     });
 
   }); // describe when autoContinueInvalidLines is false

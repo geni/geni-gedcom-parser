@@ -153,7 +153,7 @@ class GedcomParser {
         return this.invokeParseLineCallbacks(object);
       }
 
-      this.invokeCallback('ParseLineError', `Invalid line: "${line}"`);
+      this.invokeCallback('ParseLineError', 'Invalid line', line);
       return this.parseLine();
     }
 
