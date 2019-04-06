@@ -35,6 +35,27 @@ class GedcomParser {
   }
 
   /**
+   * Parse input and return an array of records.
+   *
+   * This method will call parseRecord and save the result to an array.
+   * Once all input is consumed, the array will be returned.
+   *
+   * @returns an array of GEDCOM records
+   *
+   * @since 1.0
+   * @see parseRecord method
+   */
+  parseAllRecords() {
+    const records = [];
+
+    while (this.isMoreInput()) {
+      records.push(this.parseRecord());
+    }
+
+    return records;
+  }
+
+  /**
    * Parse a GEDCOM record from the input.
    *
    * This method will call invokeParseRecordCallbacks for the record then return the record to the
@@ -43,6 +64,8 @@ class GedcomParser {
    * @returns the next GEDCOM record
    *
    * @since 1.0
+   * @see invokeParseRecordCallbacks method
+   * @see invokeCallback method
    */
   parseRecord() {
     if (!this.isMoreInput()) return null;

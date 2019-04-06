@@ -303,3 +303,24 @@ describe('parseRecord()', () => {
 
 }); // describe parseRecord()
 
+describe('parseAllRecords()', () => {
+
+  it('returns empty array when there is no input', () => {
+    const parser = new Gedcom.Parser('');
+    parser.readLine();
+    expect(parser.parseAllRecords()).toEqual([]);
+  });
+
+  it('returns all records', () => {
+    const parser   = new Gedcom.Parser('0 HEAD\n0 @I1@ INDI\n1 NAME First /Last/\n0 @F1@ FAM\n1 HUSB @I1@\n0 TRLR\n');
+    const expected = [
+      {level: 0, tag: 'HEAD'},
+      {level: 0, label: '@I1@', tag: 'INDI', structures: [{level: 1, tag: 'NAME', data: 'First /Last/'}]},
+      {level: 0, label: '@F1@', tag: 'FAM',  structures: [{level: 1, tag: 'HUSB', data: '@I1@'}]},
+      {level: 0, tag: 'TRLR'},
+    ];
+    expect(parser.parseAllRecords()).toEqual(expected);
+  });
+
+}); // describe parseAllRecords()
+
