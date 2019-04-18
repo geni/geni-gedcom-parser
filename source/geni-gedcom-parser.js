@@ -35,6 +35,17 @@ class GedcomParser {
   }
 
   /**
+   * Parse input and invoke callbacks.
+   *
+   * @since 1.0
+   */
+  parse() {
+    while (this.isMoreInput()) {
+      this.parseRecord();
+    }
+  }
+
+  /**
    * Parse input and return an array of records.
    *
    * This method will call parseRecord and save the result to an array.

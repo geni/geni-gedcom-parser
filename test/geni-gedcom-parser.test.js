@@ -324,3 +324,20 @@ describe('parseAllRecords()', () => {
 
 }); // describe parseAllRecords()
 
+describe('parse()', () => {
+
+  it('invokes callbacks', () => {
+    const parser = new Gedcom.Parser('0 INDI\n1 NAME First /Last/\n');
+    parser.onParseRecord = jest.fn();
+    parser.onParseINDIRecord = jest.fn();
+
+    parser.parse();
+
+    expect(parser.onParseRecord).toHaveBeenCalledTimes(1);
+
+    expect(parser.onParseINDIRecord).toHaveBeenCalledTimes(1);
+    const expectedINDIRecord = {level:0, tag:'INDI', structures:[{level:1, tag:'NAME', data:'First /Last/'}]};
+    expect(parser.onParseINDIRecord).toHaveBeenCalledWith(expectedINDIRecord);
+  });
+
+}); // describe parse()
